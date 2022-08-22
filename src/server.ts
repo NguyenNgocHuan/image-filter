@@ -26,6 +26,8 @@ import fetch from 'cross-fetch';
           return res.status(200).sendFile(data);
         }
         return res.status(404).send(`image_url not found`);
+        }, () => {
+          return res.status(403).send(`can not read image`);
         });
       } else {
         return res.status(404).send(`image_url not found`);
