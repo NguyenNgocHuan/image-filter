@@ -14,7 +14,7 @@ import fetch from 'cross-fetch';
   app.use(bodyParser.json());
 
   app.get('/filteredimage', async (req: Request, res: Response) => {
-    let {image_url} = req.query;
+    let {image_url}: {image_url: string}= req.query;
     if (!isUrlValid(image_url)) {
       return res.status(400).send(`image_url is invalid`);
     }
@@ -22,10 +22,12 @@ import fetch from 'cross-fetch';
       if (data.ok) {
         filterImageFromURL(image_url).then((data) => {
         if (data) {
-          deleteLocalFiles([data]);
-          return res.status(200).send(data);
+          res.on('finish', () => deleteLocalFiles([data]));
+          return res.status(200).sendFile(data);
         }
         return res.status(404).send(`image_url not found`);
+        }, () => {
+          return res.status(403).send(`can not read image`);
         });
       } else {
         return res.status(404).send(`image_url not found`);
